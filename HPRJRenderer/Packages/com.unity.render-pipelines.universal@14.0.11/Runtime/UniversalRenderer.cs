@@ -161,6 +161,8 @@ namespace UnityEngine.Rendering.Universal
         internal RTHandle colorGradingLut { get => m_PostProcessPasses.colorGradingLut; }
         internal DeferredLights deferredLights { get => m_DeferredLights; }
 
+        private HairDepthRenderPass hairDepthPass;
+        
         /// <summary>
         /// Constructor for the Universal Renderer.
         /// </summary>
@@ -325,6 +327,8 @@ namespace UnityEngine.Rendering.Universal
             m_FinalDepthCopyPass = new CopyDepthPass(RenderPassEvent.AfterRendering + 9, m_CopyDepthMaterial);
 #endif
 
+            hairDepthPass = new HairDepthRenderPass();
+
             // RenderTexture format depends on camera and pipeline (HDR, non HDR, etc)
             // Samples (MSAA) depend on camera and pipeline
             m_ColorBufferSystem = new RenderTargetBufferSystem("_CameraColorAttachment");
@@ -363,7 +367,9 @@ namespace UnityEngine.Rendering.Universal
             m_DrawOverlayUIPass?.Dispose();
 
             m_XRTargetHandleAlias?.Release();
-
+            
+            hairDepthPass?.Dispose();
+            
             ReleaseRenderTargets();
 
             base.Dispose(disposing);
@@ -657,6 +663,7 @@ namespace UnityEngine.Rendering.Universal
             bool isGizmosEnabled = false;
 #endif
 
+
             bool mainLightShadows = m_MainLightShadowCasterPass.Setup(ref renderingData);
             bool additionalLightShadows = m_AdditionalLightsShadowCasterPass.Setup(ref renderingData);
             bool transparentsNeedSettingsPass = m_TransparentSettingsPass.Setup();
@@ -822,6 +829,12 @@ namespace UnityEngine.Rendering.Universal
 
             bool hasPassesAfterPostProcessing = activeRenderPassQueue.Find(x => x.renderPassEvent == RenderPassEvent.AfterRenderingPostProcessing) != null;
 
+            
+            if (hairDepthPass.Setup(ref renderingData, HairCollector.GetHairRenderingData()))
+            {
+                EnqueuePass(hairDepthPass);
+            }
+            
             if (mainLightShadows)
                 EnqueuePass(m_MainLightShadowCasterPass);
 

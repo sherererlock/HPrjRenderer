@@ -9,6 +9,7 @@
 sampler2D _BakedOcclusionMap;
 sampler2D _ColorMap;
 sampler2D _DirectionMap;
+TextureCube _charCubeMap;
 sampler2D _BakedShadowTex;
 float _BakedShadowIntensity;
 
@@ -17,6 +18,7 @@ CBUFFER_START(UnityPerMaterial)
     // Material Properties
     sampler2D _MainMap;
     int _SupportingCharacterIndex;
+
     float _AlphaCutoff;
     float _PerceptualRoughness;
     float _Brightness;
@@ -59,8 +61,14 @@ CBUFFER_END
 float Hair_TexelSize;
 float4 Hair_ShadowFrustumParams;// x : isOrthographic, y : (orthographic) frustum size, z : (perspective) near, w : (perspective) far
 float4x4 Hair_WorldToShadow;
-int _SupportingCharacterAmount;
+//int _SupportingCharacterAmount;
 float3 _LightDirection;
+
+//Dissolve
+half _DissolveCutWidth;
+half _DissolveDivisor;
+half _DissolveReverse;
+half _DissolveDirection;
 
 TEXTURE2D_SHADOW(_HairDepthTextureCMP);
 SAMPLER_CMP(sampler_HairDepthTextureCMP);
@@ -71,7 +79,7 @@ sampler2D _DeepOpacityTexture;
 sampler2D _HairShadowTexture;
 sampler2D _SweepTex;
 sampler2D _RampTex;
-int _ShadowLightIndex;
+//int _ShadowLightIndex;
 
 half _EffectType;
 half4 _SweepColor;

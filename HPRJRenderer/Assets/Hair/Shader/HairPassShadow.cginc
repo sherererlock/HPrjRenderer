@@ -28,8 +28,8 @@ v2f vert (appdata v)
     v2f o = (v2f)0;
     VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex.xyz);
     VertexNormalInputs normalInput = GetVertexNormalInputs(v.normal, v.tangent);
-
     o.pos = vertexInput.positionCS;
+
     o.uv = v.uv;
 
     // Compute the matrix that transform directions from tangent space to world space
@@ -71,6 +71,13 @@ float4 frag (v2f i) : SV_Target
     col.gb = viewFlow.rg * 0.5 + 0.5;
     col.r = atten;
     col.a = alpha;
+
+    #if defined(_EFFECT_ON)
+        half dissolved = step(_DissolveDirection, i.TtoW1.w + (_DissolveReverse ? _DissolveCutWidth : _DissolveCutWidth * -1));
+        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+        clip((_EffectType == 1 && dissolved) ? -1: 1);
+    #endif
+
     return col;
 }
 

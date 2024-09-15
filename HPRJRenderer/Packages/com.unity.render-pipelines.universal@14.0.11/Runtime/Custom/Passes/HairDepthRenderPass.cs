@@ -22,6 +22,7 @@ namespace UnityEngine.Rendering.Universal
         private Material hairMat;
         private int shaodwCasterPass = -1;
         private int subMeshIndex = 0;
+        private HairRenderingData hairRenderingData;
 
         public bool Setup(ref RenderingData renderingData, HairRenderingData data)
         {
@@ -38,6 +39,8 @@ namespace UnityEngine.Rendering.Universal
             shaodwCasterPass = data.shadowCasterPass;
 
             renderPassEvent = RenderPassEvent.BeforeRenderingShadows;
+
+            hairRenderingData = data;
 
             return true;
         }
@@ -71,6 +74,8 @@ namespace UnityEngine.Rendering.Universal
 
             RenderingUtils.ReAllocateIfNeeded(ref hairDepthTexture, descriptor, FilterMode.Bilinear,
                 TextureWrapMode.Clamp, name: s_TextureName);
+
+            hairRenderingData.hairDepthTexture = hairDepthTexture;
             
             cmd.EnableShaderKeyword(k_RenderingHairDepth);
         }
@@ -88,6 +93,10 @@ namespace UnityEngine.Rendering.Universal
             CalcLightViewProjMatrix(light, hairMeshRenderer.bounds, out view, out proj, out shadowFrustumParams,
                 out shadowBias);
             Matrix4x4 worldToShdow = ShadowUtils.GetShadowTransform(proj, view);
+
+            hairRenderingData.worldToShadow = worldToShdow;
+            hairRenderingData.shadowFrustumParams = shadowFrustumParams;
+
             CommandBuffer cmd = renderingData.commandBuffer;
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {

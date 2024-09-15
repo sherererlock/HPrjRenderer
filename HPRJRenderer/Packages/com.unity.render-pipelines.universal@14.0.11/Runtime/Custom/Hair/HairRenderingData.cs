@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class HairRenderingData
@@ -12,6 +13,10 @@ public class HairRenderingData
     public int deepOpacityPass = -1;
     public int opaqueShadowPass = -1;
     public int transparentShadowPass = -1;
+    public Vector4 shadowFrustumParams;
+    public Vector4 shadowBias;
+    public Matrix4x4 worldToShadow;
+    public RTHandle hairDepthTexture; 
 
     public HairRenderingData(Renderer renderer)
     {

@@ -29,7 +29,7 @@
         _ShadowTintColor("阴影颜色", Color) = (1, 1, 1, 1)
         _ShadowTintPower("阴影颜色范围", Range(0.3, 2.0)) = 1.0
 
-        [KeywordEnum(UV1, UV2, UV3)] _HAIRUV("颜色贴图适用UV", Float) = 0
+        [KeywordEnum(UV1, UV2)] _HAIRUV("颜色贴图适用UV", Float) = 0
         [NoScaleOffset] _ColorMap("颜色贴图(RGB)", 2D) = "white" {}
         [KeywordEnum(Root, UV3)] _GradientMode("颜色渐变依据", Float) = 0
         _Color("整体颜色", Color) = (1, 1, 1, 1)
@@ -49,18 +49,25 @@
         _DebugValue("无意义，程序测试用", Range(-1.0, 1.0)) = 1.0
 
         [Enum(NORMAL, 0, DISSOLVE, 1, SWEEP, 2, 0)]_EffectType("特效类型", Int) = 0
+
+        //溶解
+        _DissolveCutWidth("溶解区域宽度", Range(0, 0.5)) = 0.03
+        _DissolveDivisor("边缘位置计算所需除数倒数", Float) = 1
+        _DissolveReverse("反向溶解", Float) = 0
+        _DissolveDirection("溶解方向", Range(0, 2)) = 2
+
         //扫光
         [HDR]_SweepColor("扫光颜色", Color) = (1.5, 1.5, 1.5, 1)
         _SweepColorIntensity("扫光颜色强度", Float) = 1
         _SweepTex("扫光纹理", 2D) = "black"{}
-        _RampTex("扫光叠加纹理", 2D) = "black"{}
+        // _RampTex("扫光叠加纹理", 2D) = "black"{}
         _SweepIntensity("扫光强度", Float) = 1
         _SweepRotator("扫光旋转角度", Float) = 0
     }
     SubShader
     {
         Tags{ "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline" = "UniversalPipeline"}
-        LOD 500
+        LOD 800
 
         /*
         // Pass 0 - Marschner hair shading opaque pass
@@ -88,14 +95,11 @@
                 // Lightweight Pipeline keywords
                 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
                 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-                #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+                //#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
                 #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
                 #pragma multi_compile _ _SHADOWS_SOFT
-                #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
-                #pragma multi_compile _HAIRUV_UV1 _HAIRUV_UV2
-
-                // Unity defined keywords
-                #pragma multi_compile_fog
+                //#pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
+                #pragma shader_feature_local _HAIRUV_UV1 _HAIRUV_UV2
 
                 #define OPAQUE_PASS
                 #include "HairPassShading.cginc"
@@ -120,26 +124,36 @@
                 #pragma vertex vert
                 #pragma fragment frag
 
+                #pragma shader_feature_local _ _EFFECT_ON
+
                 #include "HairVariables.cginc"
 
                 struct appdata
                 {
                     float4 vertex : POSITION;
                     float2 uv : TEXCOORD0;
+                    float3 normal : NORMAL;
+                    float4 tangent : TANGENT;
                 };
 
                 struct v2f
                 {
                     float4 pos : SV_POSITION;
                     float2 uv : TEXCOORD0;
+                    float3 worldPos : TEXCOORD1;
                 };
 
                 v2f vert (appdata v)
                 {
                     v2f o = (v2f)0;
                     VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex.xyz);
-
                     o.pos = vertexInput.positionCS;
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        o.worldPos = TransformObjectToWorld(v.vertex.xyz);
+                    #endif
+
                     o.uv = v.uv;
 
                     return o;
@@ -155,7 +169,14 @@
 
                     // alpha test
                     clip(alpha - _AlphaCutoff);
-                    
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        half dissolved = step(_DissolveDirection, i.worldPos.y + (_DissolveReverse ? _DissolveCutWidth * -1 : _DissolveCutWidth));
+                        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+                        clip((_EffectType == 1 && dissolved) ? -1: 1);
+                    #endif
+
                     return 0.0;
                 }
 
@@ -181,27 +202,25 @@
                 #pragma shader_feature_local _LIGHTPATH_ALL _LIGHTPATH_R _LIGHTPATH_TT _LIGHTPATH_TRT _LIGHTPATH_SCATTER _LIGHTPATH_SHADOW
                 #pragma shader_feature_local _LIGHTCOMPONENT_ALL _LIGHTCOMPONENT_DIRECT _LIGHTCOMPONENT_INDIRECT
                 #pragma shader_feature_local _GRADIENTMODE_ROOT _GRADIENTMODE_UV3
+                #pragma shader_feature_local _ _EFFECT_ON
 
                 // Lightweight Pipeline keywords
                 #pragma multi_compile _ _HAIR_SHADOWS
-                #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
-                #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+                #pragma multi_compile _ _ADDITIONAL_LIGHTS
+
                 #pragma multi_compile _ _SHADOWS_SOFT
-                #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
-                #pragma multi_compile _HAIRUV_UV1 _HAIRUV_UV2 _HAIRUV_UV3
+                //#pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
+                #pragma shader_feature_local _HAIRUV_UV1 _HAIRUV_UV2
             
                 //---------------------------------------
                 // Character Shadow Keywords
-                #pragma shader_feature _ _IsSupCharacter
+                //#pragma shader_feature _ _IsSupCharacter
 
                 #pragma multi_compile _ _GLOBAL_TRANSPARENTSHADOW
             
-                // // Unity defined keywords
-                #pragma multi_compile_fog
-                #pragma multi_compile _ _HEIGHT_FOG_ON
-                
                 #pragma vertex vert
                 #pragma fragment frag
+                
                 #include "HairVariables.cginc"
                 #include "HairPassShading.cginc"
             ENDHLSL
@@ -225,6 +244,7 @@
                 #pragma multi_compile _HAIRSHADOW_SHADOWMAP _HAIRSHADOW_EXPFALLOFF _HAIRSHADOW_DEEPOPACITY
                 #pragma multi_compile _ _HAIRSHADOW_SOFT
                 #pragma multi_compile _ _RENDERING_HAIR_DEPTH
+                #pragma shader_feature_local _ _EFFECT_ON
 
                 #include "HairVariables.cginc"
                 #include "HairShadow.cginc"            
@@ -233,6 +253,7 @@
                 {
                     float4 vertex : POSITION;
                     float3 normal : NORMAL;
+                    float4 tangent : TANGENT;
                     float2 uv : TEXCOORD0;
                     float4 vertexColor : COLOR;
                 };
@@ -242,6 +263,7 @@
                     float4 pos : SV_POSITION;
                     float2 uv : TEXCOORD0;
                     float4 vertexColor : TEXCOORD1;
+                    float3 worldPos : TEXCOORD2;
                 };
 
                 v2f vert(appdata v)
@@ -263,8 +285,13 @@
                         positionCS.z = max(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
                     #endif
                     o.vertexColor = v.vertexColor;
-
                     o.pos = positionCS;
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        o.worldPos = positionWS;
+                    #endif
+
                     return o;
                 }
 
@@ -276,6 +303,14 @@
                         float alpha = tex2D(_MainMap, i.uv).a;
                         clip(alpha - _AlphaCutoff);
                     #endif
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        half dissolved = step(_DissolveDirection, i.worldPos.y + (_DissolveReverse ? _DissolveCutWidth * -1 : _DissolveCutWidth));
+                        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+                        clip((_EffectType == 1 && dissolved) ? -1: 1);
+                    #endif
+
                     return 0;
                 }
             ENDHLSL
@@ -299,6 +334,8 @@
                 #pragma multi_compile _HAIRSHADOW_SHADOWMAP _HAIRSHADOW_EXPFALLOFF _HAIRSHADOW_DEEPOPACITY
                 #pragma multi_compile _ _HAIRSHADOW_SOFT
                 #pragma multi_compile _ _RENDERING_HAIR_DEPTH
+                #pragma multi_compile _ _MixedShadowTest
+                #pragma shader_feature_local _ _EFFECT_ON
 
                 #include "HairVariables.cginc"
                 #include "HairShadow.cginc"
@@ -307,6 +344,7 @@
                 {
                     float4 vertex : POSITION;
                     float3 normal : NORMAL;
+                    float4 tangent : TANGENT;
                     float2 uv : TEXCOORD0;
                     float4 vertexColor : COLOR;
 
@@ -317,6 +355,8 @@
                     float4 pos : SV_POSITION;
                     float2 uv : TEXCOORD0;
                     float4 vertexColor : TEXCOORD1;
+                    float4 grabPos : TEXCOORD2;
+                    float3 worldPos : TEXCOORD3;
                 };
 
                 v2f vert(appdata v)
@@ -339,93 +379,40 @@
                         positionCS.z = max(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
                     #endif
                     o.vertexColor = v.vertexColor;
+	                o.grabPos = ComputeScreenPos(positionCS);
 
                     o.pos = positionCS;
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        o.worldPos = positionWS;
+                    #endif
+
                     return o;
                 }
 
                 float4 frag(v2f i) : SV_TARGET
                 {
+                    half supIndex = (half)1;
+                    clip(i.grabPos.x - (supIndex - 1.0) * 1.0/(half)(1 + 0));
+                    clip(supIndex * (supIndex * 1.0/(half)(1 + 0) - i.grabPos.x));
+                    clip(supIndex + i.grabPos.x - (half)1/(1 + 0));
+                    
                     clip(i.vertexColor.a-0.5);
                     #if !defined(_RENDERING_HAIR_DEPTH) | defined(_HAIRSHADOW_SHADOWMAP)
                         float alpha = tex2D(_MainMap, i.uv).a;
                         clip(alpha - _AlphaCutoff);
                     #endif
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        half dissolved = step(_DissolveDirection, i.worldPos.y + (_DissolveReverse ? _DissolveCutWidth * -1 : _DissolveCutWidth));
+                        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+                        clip((_EffectType == 1 && dissolved) ? -1: 1);
+                    #endif
+
                     return 0;
                 }
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "PlanarShadowHair"
-            Tags{"LightMode" = "PlanarShadowHair"}
-
-
-            Stencil{
-                Ref 0
-                Comp equal
-                Pass incrWrap
-                Fail keep
-                ZFail keep
-            }
-            Blend SrcAlpha OneMinusSrcAlpha
-            ColorMask RGBA
-            ZWrite Off
-            Offset -1 , 0
-            
-
-            HLSLPROGRAM
-                #pragma vertex PlanarShadowPassVertex
-                #pragma fragment PlanarShadowPassFragment
-                // Hair Shadow Keywords
-                #pragma multi_compile _HAIRSHADOW_SHADOWMAP _HAIRSHADOW_EXPFALLOFF _HAIRSHADOW_DEEPOPACITY
-                #pragma multi_compile _ _HAIRSHADOW_SOFT
-            
-                #include "HairVariables.cginc"
-                #include "HairPassShading.cginc"
-                #include "HairShadow.cginc"
-
-                struct PlanarShadowPassAttributes
-                {
-                    float4 positionOS   : POSITION;
-                };
-
-                struct PlanarShadowPassVaryings
-                {
-                    float4 positionCS   : SV_POSITION;
-                    float4 color   : COLOR;
-
-                };
-
-                PlanarShadowPassVaryings PlanarShadowPassVertex(PlanarShadowPassAttributes input)
-                {
-                    PlanarShadowPassVaryings output = (PlanarShadowPassVaryings) 0;
-                    float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-                    float3 lightDir = normalize(_LightDirection);
-
-                    float3 shadowPos;
-
-                    shadowPos.y = min(positionWS.y,0);
-                    shadowPos.xz = positionWS.xz - lightDir.xz * max(0, positionWS.y - 0) / lightDir.y;
-                    output.positionCS = TransformWorldToHClip(shadowPos);
-
-                    float4 color;
-                    color.rgb = float3(0.1, 0.1, 0.1);
-                    float3 center = float3(unity_ObjectToWorld[0].w, 0, unity_ObjectToWorld[2].w);
-
-                    float falloff = 1.0 - saturate(distance(shadowPos, center) * 0.3);
-
-                    color.a = falloff;
-                    output.color = color;
-                    return output;
-                }
-
-                float4 PlanarShadowPassFragment(PlanarShadowPassVaryings input) : SV_TARGET
-                {
-                    return input.color;
-                }
-
             ENDHLSL
         }
 
@@ -559,6 +546,7 @@
 
                 // Material Keywords
                 #pragma shader_feature_local _FLOWDIRECTION_V _FLOWDIRECTION_DIRECTIONMAP _FLOWDIRECTION_U
+                #pragma shader_feature_local _ _EFFECT_ON
 
                 // Hair Shadow Keywords
                 #pragma multi_compile _HAIRSHADOW_SHADOWMAP _HAIRSHADOW_EXPFALLOFF _HAIRSHADOW_DEEPOPACITY
@@ -586,6 +574,7 @@
 
                 // Material Keywords
                 #pragma shader_feature_local _FLOWDIRECTION_V _FLOWDIRECTION_DIRECTIONMAP _FLOWDIRECTION_U
+                #pragma shader_feature_local _ _EFFECT_ON
 
                 // Hair Shadow Keywords
                 #pragma multi_compile _HAIRSHADOW_SHADOWMAP _HAIRSHADOW_EXPFALLOFF _HAIRSHADOW_DEEPOPACITY
@@ -665,6 +654,7 @@
             ColorMask 0
 
             HLSLPROGRAM
+                #pragma shader_feature_local _ _EFFECT_ON
                 #pragma vertex vert
                 #pragma fragment frag
 
@@ -674,12 +664,15 @@
                 {
                     float4 vertex : POSITION;
                     float2 uv : TEXCOORD0;
+                    float3 normal : NORMAL;
+                    float4 tangent : TANGENT;
                 };
 
                 struct v2f
                 {
                     float4 pos : SV_POSITION;
                     float2 uv : TEXCOORD0;
+                    float3 worldPos : TEXCOORD1;
                 };
 
                 v2f vert (appdata v)
@@ -688,6 +681,12 @@
                     VertexPositionInputs vertexInput = GetVertexPositionInputs(v.vertex.xyz);
 
                     o.pos = vertexInput.positionCS;
+
+                     //dissove
+                    #if defined(_EFFECT_ON)
+                        o.worldPos = TransformObjectToWorld(v.vertex.xyz);
+                    #endif
+
                     o.uv = v.uv;
 
                     return o;
@@ -703,7 +702,14 @@
 
                     // alpha test
                     clip(alpha - _AlphaCutoff);
-                    
+
+                    //dissove
+                    #if defined(_EFFECT_ON)
+                        half dissolved = step(_DissolveDirection, i.worldPos.y + (_DissolveReverse ? _DissolveCutWidth * -1 : _DissolveCutWidth));
+                        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+                        clip((_EffectType == 1 && dissolved) ? -1: 1);
+                    #endif
+
                     return 0.0;
                 }
 
@@ -726,11 +732,12 @@
                 // Material Keywords
                 #pragma shader_feature_local _LIGHTPATH_ALL _LIGHTPATH_R _LIGHTPATH_TT _LIGHTPATH_TRT _LIGHTPATH_SCATTER _LIGHTPATH_SHADOW
                 #pragma shader_feature_local _LIGHTCOMPONENT_ALL _LIGHTCOMPONENT_DIRECT _LIGHTCOMPONENT_INDIRECT
-	#pragma shader_feature_local _GRADIENTMODE_ROOT _GRADIENTMODE_UV3
+                #pragma shader_feature_local _GRADIENTMODE_ROOT _GRADIENTMODE_UV3
+                #pragma shader_feature_local _ _EFFECT_ON
 
-                #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
-                #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
-                #pragma multi_compile _HAIRUV_UV1 _HAIRUV_UV2 _HAIRUV_UV3
+                //#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+                //#pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
+                #pragma shader_feature_local _HAIRUV_UV1 _HAIRUV_UV2
             
                 #pragma vertex vert
                 #pragma fragment lowFrag
@@ -739,6 +746,7 @@
                 #include "HairPassShading.cginc"
             ENDHLSL
         }
+
 
         // Pass 3 - deep opacity pass
         Pass

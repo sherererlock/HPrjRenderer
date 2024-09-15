@@ -171,13 +171,13 @@ float SampleHairShadow(float2 screenUV)
     return tex2D(_HairShadowTexture, screenUV).r;
 }
 
-float CalculateLightShadow(Light light, float hairShadow, int index)
+/*float CalculateLightShadow(Light light, float hairShadow, int index)
 {
     if(index == _ShadowLightIndex)
         light.shadowAttenuation = hairShadow;
     else
         light.shadowAttenuation = saturate(lerp(1.0, light.shadowAttenuation, _ShadowIntensity));
     return light.shadowAttenuation * light.distanceAttenuation;
-}
+}*/
 
 #endif

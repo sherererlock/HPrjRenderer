@@ -162,6 +162,7 @@ namespace UnityEngine.Rendering.Universal
         internal DeferredLights deferredLights { get => m_DeferredLights; }
 
         private HairDepthRenderPass hairDepthPass;
+        private HairShadowRenderPass hairShadowPass;
         
         /// <summary>
         /// Constructor for the Universal Renderer.
@@ -328,6 +329,7 @@ namespace UnityEngine.Rendering.Universal
 #endif
 
             hairDepthPass = new HairDepthRenderPass();
+            hairShadowPass = new HairShadowRenderPass();
 
             // RenderTexture format depends on camera and pipeline (HDR, non HDR, etc)
             // Samples (MSAA) depend on camera and pipeline
@@ -369,6 +371,7 @@ namespace UnityEngine.Rendering.Universal
             m_XRTargetHandleAlias?.Release();
             
             hairDepthPass?.Dispose();
+            hairShadowPass?.Dispose();
             
             ReleaseRenderTargets();
 
@@ -834,6 +837,9 @@ namespace UnityEngine.Rendering.Universal
             {
                 EnqueuePass(hairDepthPass);
             }
+            
+            if(hairShadowPass.Setup(ref renderingData, HairCollector.GetHairRenderingData()))
+                EnqueuePass(hairShadowPass);
             
             if (mainLightShadows)
                 EnqueuePass(m_MainLightShadowCasterPass);

@@ -5,7 +5,7 @@ using UnityEngine.Experimental;
 
 namespace UnityEngine.Rendering.Universal
 {
-    public class HairShaodwRenderPass : ScriptableRenderPass
+    public class HairShadowRenderPass : ScriptableRenderPass
     {
         private RTHandle hairShadowTexture;
         private RTHandle blurredHairShadowTexture;
@@ -19,7 +19,15 @@ namespace UnityEngine.Rendering.Universal
         private Material hairMat;
         private int opaqueShadowPass = -1;
         private int deepOpacityPass = -1;
+        private int transparentShadowPass = -1;
         private int subMeshIndex = 0;
+
+        private const string s_BlurShaderName = "Hair/Gaussian Blur Flow";
+        private Shader blurShader = null;
+        private Material blurMat = null;
+        public float blurSize = 5.0f;
+        
+        private HairRenderingData hairRenderingData;
 
         public bool Setup(ref RenderingData renderingData, HairRenderingData data)
         {
@@ -29,8 +37,18 @@ namespace UnityEngine.Rendering.Universal
             hairMat = data.hairMaterial;
             opaqueShadowPass = data.opaqueShadowPass;
             deepOpacityPass = data.deepOpacityPass;
+            transparentShadowPass = data.transparentShadowPass;
             
             renderPassEvent = RenderPassEvent.BeforeRenderingPrePasses;
+
+            if (blurShader == null)
+            {
+                blurShader = Shader.Find(s_BlurShaderName);
+                blurMat = CoreUtils.CreateEngineMaterial(blurShader);
+                blurMat.SetFloat("_BlurSize", blurSize);
+            }
+
+            hairRenderingData = data;
 
             return true;
         }
@@ -53,6 +71,11 @@ namespace UnityEngine.Rendering.Universal
             cameraTextureDescriptor.depthBufferBits = 0;
             RenderingUtils.ReAllocateIfNeeded(ref hairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_TextureName);
             RenderingUtils.ReAllocateIfNeeded(ref blurredHairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_BlurredTextureName);
+            
+            if(blurMat != null)
+                Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
+            else
+                Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
         }
 
         // Here you can implement the rendering logic.
@@ -64,17 +87,29 @@ namespace UnityEngine.Rendering.Universal
             CommandBuffer cmd = renderingData.commandBuffer;
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
+                cmd.SetGlobalVector("Hair_ShadowFrustumParams", hairRenderingData.shadowFrustumParams);
+                cmd.SetGlobalMatrix("Hair_WorldToShadow", hairRenderingData.worldToShadow);
                 
+                cmd.SetGlobalTexture("_HairDepthTexture", hairRenderingData.hairDepthTexture);
+             
+                cmd.DrawRenderer(hairMeshRenderer, hairMat, subMeshIndex, opaqueShadowPass);
+                cmd.DrawRenderer(hairMeshRenderer, hairMat, subMeshIndex, transparentShadowPass);
+
+                if (blurMat != null)
+                    Blit(cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
             }
         }
 
+
         // Cleanup any allocated resources that were created during the execution of this render pass.
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-        }
+        // public override void OnCameraCleanup(CommandBuffer cmd)
+        // {
+        // }
 
         public void Dispose()
         {
+            hairShadowTexture?.Release();
+            blurredHairShadowTexture?.Release();
         }
     }
 }

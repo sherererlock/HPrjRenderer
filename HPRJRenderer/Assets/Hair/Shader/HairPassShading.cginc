@@ -3,7 +3,16 @@
 #include "HairShading.cginc"
 #include "HairShadow.cginc"
 
-#define UNITY_PI_DIV_180 1.0 / 3.141592654
+
+
+float3 GlossyEnvironmentReflectionCustom(float3 reflectVector, half perceptualRoughness)
+{
+    half mip = PerceptualRoughnessToMipmapLevel(perceptualRoughness);
+    half4 encodedIrradiance = SAMPLE_TEXTURECUBE_LOD(_charCubeMap, samplerunity_SpecCube0, reflectVector, mip);
+    half3 irradiance = DecodeHDREnvironment(encodedIrradiance, unity_SpecCube0_HDR);
+    return irradiance;
+	//return GlossyEnvironmentReflection(reflectVector, perceptualRoughness, 1.0);
+}
 
 struct appdata
 {
@@ -35,6 +44,7 @@ struct v2f
 
     float4 screenPos : TEXCOORD6;
     float4 vertexColor : TEXCOORD8;
+    int characterShadowLayerIndex : TEXCOORD9;
 };
 
 v2f vert (appdata v)
@@ -58,7 +68,7 @@ v2f vert (appdata v)
     o.fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
 
     #if defined(_MAIN_LIGHT_SHADOWS) && !defined(_RECEIVE_SHADOWS_OFF)
-    o.shadowCoord = GetCharacterShadowCoord(vertexInput, _SupportingCharacterIndex);
+    o.shadowCoord = GetMixedCharactersShadowCoord(vertexInput, _SupportingCharacterIndex);
     #endif
 
     o.screenPos = ComputeScreenPos(o.pos);
@@ -67,17 +77,36 @@ v2f vert (appdata v)
 }
 half _IndirectDiffuseScale;
 
+inline float randomNoise(half2 uv)
+{
+    return frac(sin(dot(uv, half2(2.9, 8.2))) * 0.5);
+}
+inline float valueNoise(float2 uv)
+{
+    float2 intPos = floor(uv);
+    float2 fracPos = frac(uv);
+    float2 u = fracPos * fracPos * (3.0 - 2.0 * fracPos);
+    uv = abs(frac(uv) - 0.5);
+
+    float va = randomNoise(intPos + float2(0.0, 0.0));
+    float vb = randomNoise(intPos + float2(1.0, 0.0));
+    float vc = randomNoise(intPos + float2(0.0, 1.0));
+    float vd = randomNoise(intPos + float2(1.0, 1.0));
+    float value1 = lerp(va, vb, u.x);
+    float value2 = lerp(vc, vd, u.x);
+    float value = lerp(value1, value2, u.y);
+    return value;
+}
+
 float4 frag (v2f i) : SV_Target
 {
     float4 mainMap = tex2D(_MainMap, i.uv);
-    #if defined(_HAIRUV_UV1)
+    #if _HAIRUV_UV1 
         float4 colorMap = tex2D(_ColorMap, i.uv);
-    #elif defined(_HAIRUV_UV2)
+    #else
         float4 colorMap = tex2D(_ColorMap, i.uv2.xy);
-    #else//_HAIRUV_UV3
-        float4 colorMap = tex2D(_ColorMap, i.uv2.zw);
     #endif
-    float4 occMap = tex2D(_BakedOcclusionMap, i.uv2.xy);
+    float4 occMap = tex2D(_BakedOcclusionMap, i.uv2);
 
     // calculate params for shading model
     float alpha = mainMap.a;
@@ -141,6 +170,9 @@ float4 frag (v2f i) : SV_Target
     #endif
 
     float hairShadow = SampleHairShadow(i.screenPos.xy / i.screenPos.w);
+    #if !defined(_HAIR_SHADOWS)
+        hairShadow = saturate(lerp(1.0, tex2D(_BakedShadowTex, i.uv2.xy).r, _BakedShadowIntensity));
+    #endif
 
     hairShadow = saturate(lerp(1.0, hairShadow, _ShadowIntensity));
     hairShadow = lerp(hairShadow, 1.0, root * _ShadowRoot);
@@ -160,8 +192,10 @@ float4 frag (v2f i) : SV_Target
         float4 shadowCoord = float4(0, 0, 0, 0);
     #endif
     Light mainLight = GetMainLight(shadowCoord);
+    //return float4(mainLight.color,1);
+
     L = normalize(mainLight.direction);
-    atten = CalculateLightShadow(mainLight, hairShadow, -2);
+    atten = hairShadow;
 
     #if defined(_LIGHTCOMPONENT_ALL) | defined(_LIGHTCOMPONENT_DIRECT)
         col += mainLight.color * atten * HairShading(albedo, roughness, lighting_params, L, V, T, atten, root, 0.0);
@@ -169,24 +203,39 @@ float4 frag (v2f i) : SV_Target
 
     // Additional Light
     // force additional light to be calculated per-pixel
+    /*
     #if defined(_ADDITIONAL_LIGHTS) || defined(_ADDITIONAL_LIGHTS_VERTEX)
         int pixelLightCount = GetAdditionalLightsCount();
 
         for (int k = 0; k < pixelLightCount; ++k)
         {
-            Light addLight = GetAdditionalLight(k, worldPos);
+            Light addLight = GetAdditionalLight(k, worldPos, float4(1,1,1,1), _SupportingCharacterIndex);
             L = normalize(addLight.direction);
-            atten = CalculateLightShadow(addLight, hairShadow, GetPerObjectLightIndex(k));
+            atten = hairShadow;
             #if defined(_LIGHTCOMPONENT_ALL) | defined(_LIGHTCOMPONENT_DIRECT)
                 col += addLight.color * atten * HairShadingSimple(albedo, roughness, lighting_params, L, V, T, 1.0, root, 0.0) * _AddLightIntensity;
             #endif
         }
     #endif
+    */
+    #if defined(_ADDITIONAL_LIGHTS)
+    int pixelLightCount = GetAdditionalLightsCount();
+    for (int k = 0; k < pixelLightCount; ++k)
+    {
+        int perObjectLightIndex = GetPerObjectLightIndex(k);
+
+        Light addLight = GetAdditionalLight(k, worldPos, float4(1,1,1,1));
+        L = normalize(addLight.direction);
+
+        atten = hairShadow * addLight.shadowAttenuation * addLight.distanceAttenuation;
+        col += addLight.color * atten * HairShadingSimple(albedo, roughness, lighting_params, L, V, T, 1.0, root, 0.0) * _AddLightIntensity;
+    }
+    #endif
 
     // Environment Lighting
     // use fake normal to sample SH, call SampleSH() directly to force totally per-pixel sampling
     float3 reflectVector = reflect(-V, fakeNormal);
-    float3 env = GlossyEnvironmentReflection(reflectVector, saturate(_PerceptualRoughness + 0.2), 1.0);
+    float3 env = GlossyEnvironmentReflectionCustom(reflectVector, saturate(_PerceptualRoughness + 0.2));
     float3 ambient = SampleSH(worldNormal) * _IndirectDiffuseScale;
     #if defined(_LIGHTCOMPONENT_ALL) | defined(_LIGHTCOMPONENT_INDIRECT)
         lighting_params.x = 0;
@@ -199,19 +248,50 @@ float4 frag (v2f i) : SV_Target
     float3 shadowTint = lerp(_ShadowTintColor.rgb, 1, pow(abs(hairShadow * occ), _ShadowTintPower));
     col *= _Brightness * occ * shadowTint;
 
-    //��Ч
-    half rad = _SweepRotator * UNITY_PI_DIV_180;
-    half2 uvSweepTex = worldPos.xy * _SweepTex_ST.xy + _SweepTex_ST.zw;
-    half2 uvRotator = mul( uvSweepTex - half2(0.5,0.5) , half2x2(cos(rad), -sin(rad), sin(rad), cos(rad) )) + half2(0.5,0.5);
-    half4 rampColor = tex2D( _RampTex,  uvSweepTex);
-    half4 lightSweepAlbedo = tex2D( _SweepTex, uvRotator);
-    half4 outputLightSweep = saturate(lightSweepAlbedo * _SweepColor * _SweepColorIntensity * _SweepIntensity * rampColor);
+    #if defined(_EFFECT_ON)
+        //Dissolve  (_EffectType == 1)
+        half dissolveAlpha = alpha;
 
-    half3 sweepColor = outputLightSweep.a * outputLightSweep.rgb + col;
-    half3 sweepAlpha = alpha;
+        half dissolved = step(_DissolveDirection, worldPos.y);
+        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+        dissolveAlpha = dissolved ? 0 : 1;
 
-    col = col * step(_EffectType, 0) * step(0, _EffectType) + sweepColor * step(_EffectType, 2) * step(2, _EffectType);
-    alpha = alpha * step(_EffectType, 0) * step(0, _EffectType) + sweepAlpha * step(_EffectType, 2) * step(2, _EffectType);
+        half cutBorder = (worldPos.y < (_DissolveDirection + _DissolveCutWidth) && worldPos.y > (_DissolveDirection - _DissolveCutWidth));
+        half distance = abs(worldPos.y - _DissolveDirection + (_DissolveReverse ? _DissolveCutWidth : _DissolveCutWidth * -1));
+        dissolveAlpha = cutBorder ? alpha * (distance * _DissolveDivisor) : dissolveAlpha;
+
+        alpha = (_EffectType == 1) ? dissolveAlpha * alpha : alpha;
+
+        //Sweep  (_EffectType == 2)
+        half rad = _SweepRotator * UNITY_PI_DIV_180;
+        half2 uvSweepTex = worldPos.xy * _SweepTex_ST.xy + _SweepTex_ST.zw;
+        half2 uvRotator = mul( uvSweepTex - half2(0.5,0.5) , half2x2(cos(rad), -sin(rad), sin(rad), cos(rad) )) + half2(0.5,0.5);
+
+        half x = fmod(abs(uvSweepTex.x), 1.0) * 2;
+        x = (x > 1) ? 2 - x : x;
+        half3 col1 = pow(half3(255, 245, 172) / 255.0, 2.2);
+        half3 col2 = pow(half3(255, 203, 111) / 255.0, 2.2);
+        half3 col3 = pow(half3(235, 129, 199) / 255.0, 2.2);
+        half3 col4 = pow(half3(176, 123, 238) / 255.0, 2.2);
+        half3 col5 = pow(half3(70, 174, 238) / 255.0, 2.2);
+        half3 col6 = pow(half3(27, 222, 237) / 255.0, 2.2);
+        half3 rColor = step(0.0, x) * step(x, 0.2) * lerp(col1, col2, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.2, x) * step(x, 0.4) * lerp(col2, col3, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.4, x) * step(x, 0.6) * lerp(col3, col4, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.6, x) * step(x, 0.8) * lerp(col4, col5, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.8, x) * step(x, 1.0) * lerp(col5, col6, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3));
+        half4 rampColor = half4(rColor, 1);
+
+        // half4 rampColor = tex2D( _RampTex,  uvSweepTex);
+        half4 lightSweepAlbedo = tex2D( _SweepTex, uvRotator);
+        half4 outputLightSweep = saturate(lightSweepAlbedo * _SweepColor * _SweepColorIntensity * _SweepIntensity * rampColor);
+
+        half3 sweepColor = outputLightSweep.a * outputLightSweep.rgb + col;
+        half3 sweepAlpha = alpha;
+
+        col = (_EffectType == 2) ? sweepColor : col;
+        alpha = (_EffectType == 2) ? sweepAlpha * alpha : alpha;
+    #endif
 
     return float4(col, alpha);
 }
@@ -219,19 +299,17 @@ float4 frag (v2f i) : SV_Target
 float4 lowFrag (v2f i) : SV_Target
 {
     float4 mainMap = tex2D(_MainMap, i.uv);
-    #if defined(_HAIRUV_UV1)
+    #if _HAIRUV_UV1 
         float4 colorMap = tex2D(_ColorMap, i.uv);
-    #elif defined(_HAIRUV_UV2)
+    #else
         float4 colorMap = tex2D(_ColorMap, i.uv2.xy);
-    #else//_HAIRUV_UV3
-        float4 colorMap = tex2D(_ColorMap, i.uv2.zw);
     #endif
 
     // calculate params for shading model
     float alpha = mainMap.a;
     float id = mainMap.r;
     float root = mainMap.g;
-    float occ = saturate(lerp(1.0, mainMap.b, _OcclusionIntensity));
+    float occ = saturate(lerp(1.0, mainMap.b.r, _OcclusionIntensity));
     float roughness = max(0.0001, square(_PerceptualRoughness));
 
     float3 albedo = colorMap.rgb * _Color.rgb;
@@ -288,7 +366,7 @@ float4 lowFrag (v2f i) : SV_Target
         // _VIS_OFF, do nothing
     #endif
 
-     float hairShadow = saturate(lerp(1.0, tex2D(_BakedShadowTex, i.uv2.xy).r, _BakedShadowIntensity));
+    float hairShadow = saturate(lerp(1.0, tex2D(_BakedShadowTex, i.uv2.xy).r, _BakedShadowIntensity));
 
     hairShadow = saturate(lerp(1.0, hairShadow, _ShadowIntensity));
     hairShadow = lerp(hairShadow, 1.0, root * _ShadowRoot);
@@ -308,6 +386,7 @@ float4 lowFrag (v2f i) : SV_Target
         float4 shadowCoord = float4(0, 0, 0, 0);
     #endif
     Light mainLight = GetMainLight(shadowCoord);
+
     L = normalize(mainLight.direction);
     atten = hairShadow;
 
@@ -317,6 +396,54 @@ float4 lowFrag (v2f i) : SV_Target
 
     float3 shadowTint = lerp(_ShadowTintColor.rgb, 1, pow(abs(atten * occ), _ShadowTintPower));
     col *= _Brightness * occ * shadowTint;
-    return float4(MixFog(col, i.fogFactor), alpha);
+
+    #if defined(_EFFECT_ON)
+        //Dissolve  (_EffectType == 1)
+        half dissolveAlpha = alpha;
+
+        half dissolved = step(_DissolveDirection, worldPos.y);
+        dissolved = _DissolveReverse ? (1 - dissolved) : dissolved;
+        dissolveAlpha = dissolved ? 0 : 1;
+
+        half cutBorder = (worldPos.y < (_DissolveDirection + _DissolveCutWidth) && worldPos.y > (_DissolveDirection - _DissolveCutWidth));
+        half distance = abs(worldPos.y - _DissolveDirection + (_DissolveReverse ? _DissolveCutWidth : _DissolveCutWidth * -1));
+        dissolveAlpha = cutBorder ? alpha * (distance * _DissolveDivisor) : dissolveAlpha;
+
+        alpha = (_EffectType == 1) ? dissolveAlpha * alpha : alpha;
+
+        //Sweep  (_EffectType == 2)
+        half rad = _SweepRotator * UNITY_PI_DIV_180;
+        half2 uvSweepTex = worldPos.xy * _SweepTex_ST.xy + _SweepTex_ST.zw;
+        half2 uvRotator = mul( uvSweepTex - half2(0.5,0.5) , half2x2(cos(rad), -sin(rad), sin(rad), cos(rad) )) + half2(0.5,0.5);
+
+        half x = fmod(abs(uvSweepTex.x), 1.0) * 2;
+        x = (x > 1) ? 2 - x : x;
+        half3 col1 = pow(half3(255, 245, 172) / 255.0, 2.2);
+        half3 col2 = pow(half3(255, 203, 111) / 255.0, 2.2);
+        half3 col3 = pow(half3(235, 129, 199) / 255.0, 2.2);
+        half3 col4 = pow(half3(176, 123, 238) / 255.0, 2.2);
+        half3 col5 = pow(half3(70, 174, 238) / 255.0, 2.2);
+        half3 col6 = pow(half3(27, 222, 237) / 255.0, 2.2);
+        half3 rColor = step(0.0, x) * step(x, 0.2) * lerp(col1, col2, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.2, x) * step(x, 0.4) * lerp(col2, col3, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.4, x) * step(x, 0.6) * lerp(col3, col4, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.6, x) * step(x, 0.8) * lerp(col4, col5, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3))
+                     + step(0.8, x) * step(x, 1.0) * lerp(col5, col6, max(pow(fmod(x, 0.2) * 5, 1.5), 1e-3));
+        half4 rampColor = half4(rColor, 1);
+
+        // half4 rampColor = tex2D( _RampTex,  uvSweepTex);
+        half4 lightSweepAlbedo = tex2D( _SweepTex, uvRotator);
+        half4 outputLightSweep = saturate(lightSweepAlbedo * _SweepColor * _SweepColorIntensity * _SweepIntensity * rampColor);
+
+        half3 sweepColor = outputLightSweep.a * outputLightSweep.rgb + col;
+        half3 sweepAlpha = alpha;
+
+        col = (_EffectType == 2) ? sweepColor : col;
+        alpha = (_EffectType == 2) ? sweepAlpha * alpha : alpha;
+    #endif
+
+
+    return float4(col, alpha);
 }
+
 #endif

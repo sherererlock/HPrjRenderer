@@ -21,8 +21,8 @@
 
 				#include "UnityCG.cginc"
 
-				sampler2D _MainTex;  
-				half4 _MainTex_TexelSize;
+				sampler2D _BlitTexture;  
+				half4 _BlitTexture_TexelSize;
 				float _BlurSize;
 
 				struct appdata
@@ -48,13 +48,13 @@
 				{
 					float weight[3] = {0.4026, 0.2442, 0.0545};
 					
-					float4 sample0 = tex2D(_MainTex, i.uv);
+					float4 sample0 = tex2D(_BlitTexture, i.uv);
 					float2 flow = sample0.gb * 2 - 1;
 
-					float4 sample1 = tex2D(_MainTex, i.uv + _MainTex_TexelSize.xy * flow * 1.0 * _BlurSize);
-					float4 sample2 = tex2D(_MainTex, i.uv - _MainTex_TexelSize.xy * flow * 1.0 * _BlurSize);
-					float4 sample3 = tex2D(_MainTex, i.uv + _MainTex_TexelSize.xy * flow * 2.0 * _BlurSize);
-					float4 sample4 = tex2D(_MainTex, i.uv - _MainTex_TexelSize.xy * flow * 2.0 * _BlurSize);
+					float4 sample1 = tex2D(_BlitTexture, i.uv + _BlitTexture_TexelSize.xy * flow * 1.0 * _BlurSize);
+					float4 sample2 = tex2D(_BlitTexture, i.uv - _BlitTexture_TexelSize.xy * flow * 1.0 * _BlurSize);
+					float4 sample3 = tex2D(_BlitTexture, i.uv + _BlitTexture_TexelSize.xy * flow * 2.0 * _BlurSize);
+					float4 sample4 = tex2D(_BlitTexture, i.uv - _BlitTexture_TexelSize.xy * flow * 2.0 * _BlurSize);
 
 					float4 sum = sample0 * weight[0] + (sample1 + sample2) * weight[1] + (sample3 + sample4) * weight[2];
 					return sum;

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Experimental;
+using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering.Universal
 {
@@ -56,8 +57,8 @@ namespace UnityEngine.Rendering.Universal
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
             ConfigureTarget(hairShadowTexture, hairShadowTexture);
-            ConfigureClear(ClearFlag.All, Color.black);
-            ConfigureDepthStoreAction(RenderBufferStoreAction.DontCare);
+            ConfigureClear(ClearFlag.All,new Color(0.0f, 0.5f, 0.5f, 0));
+            //ConfigureDepthStoreAction(RenderBufferStoreAction.DontCare);
         }
 
         // This method is called before executing the render pass.
@@ -68,11 +69,12 @@ namespace UnityEngine.Rendering.Universal
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             RenderTextureDescriptor cameraTextureDescriptor = renderingData.cameraData.cameraTargetDescriptor;
-            cameraTextureDescriptor.depthBufferBits = 0;
+
+            cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R32G32B32A32_SFloat;
+            cameraTextureDescriptor.depthBufferBits = 16;
+            
             RenderingUtils.ReAllocateIfNeeded(ref hairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_TextureName);
             RenderingUtils.ReAllocateIfNeeded(ref blurredHairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_BlurredTextureName);
-            
-
         }
 
         // Here you can implement the rendering logic.
@@ -92,13 +94,15 @@ namespace UnityEngine.Rendering.Universal
                 cmd.DrawRenderer(hairMeshRenderer, hairMat, subMeshIndex, opaqueShadowPass);
                 cmd.DrawRenderer(hairMeshRenderer, hairMat, subMeshIndex, transparentShadowPass);
 
-                if (blurMat != null)
-                    Blit(cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
-                
-                if(blurMat != null)
-                    Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
-                else
-                    Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
+                // if (blurMat != null)
+                //     Blit(cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
+                //
+                // if(blurMat != null)
+                //     Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
+                // else
+                //     Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
             }
         }
 

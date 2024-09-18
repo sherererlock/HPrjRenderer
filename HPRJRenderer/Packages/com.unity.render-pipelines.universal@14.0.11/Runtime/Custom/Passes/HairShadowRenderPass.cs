@@ -72,10 +72,7 @@ namespace UnityEngine.Rendering.Universal
             RenderingUtils.ReAllocateIfNeeded(ref hairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_TextureName);
             RenderingUtils.ReAllocateIfNeeded(ref blurredHairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_BlurredTextureName);
             
-            if(blurMat != null)
-                Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
-            else
-                Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
+
         }
 
         // Here you can implement the rendering logic.
@@ -97,6 +94,11 @@ namespace UnityEngine.Rendering.Universal
 
                 if (blurMat != null)
                     Blit(cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
+                
+                if(blurMat != null)
+                    Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
+                else
+                    Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
             }
         }
 

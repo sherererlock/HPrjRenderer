@@ -19,4 +19,12 @@ public static class HairCollector
         return _hairRenderingDatas.Count > 0 ? _hairRenderingDatas[0] : null;
     }
     
+    
+    public static void RemoveHairRender(MeshRenderer meshRenderer)
+    {
+        if (!_hairRenderer.Contains(meshRenderer)) return;
+        int idx = _hairRenderer.IndexOf(meshRenderer);
+        _hairRenderer.Remove(meshRenderer);
+        _hairRenderingDatas.RemoveAt(idx);
+    }
 }

@@ -837,9 +837,16 @@ namespace UnityEngine.Rendering.Universal
             {
                 EnqueuePass(hairDepthPass);
             }
-            
-            if(hairShadowPass.Setup(ref renderingData, HairCollector.GetHairRenderingData()))
+
+            if (hairShadowPass.Setup(ref renderingData, HairCollector.GetHairRenderingData()))
+            {
                 EnqueuePass(hairShadowPass);
+                CoreUtils.SetKeyword(cmd, "_HAIR_SHADOWS", true);   
+            }
+            else
+            {
+                CoreUtils.SetKeyword(cmd, "_HAIR_SHADOWS", false);   
+            }
             
             if (mainLightShadows)
                 EnqueuePass(m_MainLightShadowCasterPass);

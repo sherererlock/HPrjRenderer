@@ -7,7 +7,7 @@
 	}
 	SubShader
 	{
-		ZTest Always
+		ZTest Off
 		Cull Off
 		ZWrite Off
 
@@ -19,6 +19,8 @@
 				#pragma vertex vertBlurFlow
 				#pragma fragment fragBlurFlow
 
+				#pragma enable_d3d11_debug_symbols
+			
 				#include "UnityCG.cginc"
 
 				sampler2D _BlitTexture;  

@@ -10,6 +10,7 @@ namespace UnityEngine.Rendering.Universal
     {
         private RTHandle hairShadowTexture;
         private RTHandle blurredHairShadowTexture;
+        private RTHandle depth;
         
         private ProfilingSampler m_ProfilingSampler = new ProfilingSampler("Hair Shadow");
         
@@ -32,7 +33,11 @@ namespace UnityEngine.Rendering.Universal
 
         public bool Setup(ref RenderingData renderingData, HairRenderingData data)
         {
-            if (data == null) return false;
+            if (data == null)
+            {
+                Dispose();
+                return false;
+            }
             
             hairMeshRenderer = data.hairRenderer;
             hairMat = data.hairMaterial;
@@ -56,7 +61,7 @@ namespace UnityEngine.Rendering.Universal
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
-            ConfigureTarget(hairShadowTexture, hairShadowTexture);
+            ConfigureTarget(hairShadowTexture, depth);
             ConfigureClear(ClearFlag.All,new Color(0.0f, 0.5f, 0.5f, 0));
             //ConfigureDepthStoreAction(RenderBufferStoreAction.DontCare);
         }
@@ -71,10 +76,14 @@ namespace UnityEngine.Rendering.Universal
             RenderTextureDescriptor cameraTextureDescriptor = renderingData.cameraData.cameraTargetDescriptor;
 
             cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R32G32B32A32_SFloat;
-            cameraTextureDescriptor.depthBufferBits = 16;
+            cameraTextureDescriptor.depthBufferBits = 0;
             
             RenderingUtils.ReAllocateIfNeeded(ref hairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_TextureName);
             RenderingUtils.ReAllocateIfNeeded(ref blurredHairShadowTexture, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_BlurredTextureName);
+            
+            cameraTextureDescriptor.graphicsFormat = GraphicsFormat.None;
+            cameraTextureDescriptor.depthBufferBits = 16;
+            RenderingUtils.ReAllocateIfNeeded(ref depth, cameraTextureDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name:s_BlurredTextureName);
         }
 
         // Here you can implement the rendering logic.
@@ -96,13 +105,13 @@ namespace UnityEngine.Rendering.Universal
 
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
-                // if (blurMat != null)
-                //     Blit(cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
-                //
-                // if(blurMat != null)
-                //     Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
-                // else
-                //     Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
+                if (blurMat != null)
+                    Blit(cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
+                
+                if(blurMat != null)
+                    Shader.SetGlobalTexture("_HairShadowTexture", blurredHairShadowTexture);
+                else
+                    Shader.SetGlobalTexture("_HairShadowTexture", hairShadowTexture);
             }
         }
 
@@ -115,7 +124,9 @@ namespace UnityEngine.Rendering.Universal
         public void Dispose()
         {
             hairShadowTexture?.Release();
+            hairShadowTexture = null;
             blurredHairShadowTexture?.Release();
+            blurredHairShadowTexture = null;
         }
     }
 }

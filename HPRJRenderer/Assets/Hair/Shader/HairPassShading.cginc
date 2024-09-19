@@ -7,11 +7,11 @@
 
 float3 GlossyEnvironmentReflectionCustom(float3 reflectVector, half perceptualRoughness)
 {
-    half mip = PerceptualRoughnessToMipmapLevel(perceptualRoughness);
-    half4 encodedIrradiance = SAMPLE_TEXTURECUBE_LOD(_charCubeMap, samplerunity_SpecCube0, reflectVector, mip);
-    half3 irradiance = DecodeHDREnvironment(encodedIrradiance, unity_SpecCube0_HDR);
-    return irradiance;
-	//return GlossyEnvironmentReflection(reflectVector, perceptualRoughness, 1.0);
+    // half mip = PerceptualRoughnessToMipmapLevel(perceptualRoughness);
+    // half4 encodedIrradiance = SAMPLE_TEXTURECUBE_LOD(_charCubeMap, samplerunity_SpecCube0, reflectVector, mip);
+    // half3 irradiance = DecodeHDREnvironment(encodedIrradiance, unity_SpecCube0_HDR);
+    // return irradiance;
+	return GlossyEnvironmentReflection(reflectVector, perceptualRoughness, 1.0);
 }
 
 struct appdata

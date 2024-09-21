@@ -21,8 +21,8 @@
 
 				#pragma enable_d3d11_debug_symbols
 			
-				#include "UnityCG.cginc"
-
+				#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+			
 				sampler2D _BlitTexture;  
 				half4 _BlitTexture_TexelSize;
 				float _BlurSize;
@@ -31,6 +31,7 @@
 				{
 				    float4 vertex : POSITION;
 				    float2 uv : TEXCOORD0;
+					uint vertexID : SV_VertexID;
 				};
 
 				struct v2f {
@@ -41,11 +42,20 @@
 				v2f vertBlurFlow(appdata v)
 				{
 					v2f o = (v2f)0;
-    				o.pos = UnityObjectToClipPos(v.vertex);
-					o.uv = v.uv;
+
+					#if SHADER_API_GLES
+					    float4 pos = input.positionOS;
+					    float2 uv  = input.uv;
+					#else
+					    float4 pos = GetFullScreenTriangleVertexPosition(v.vertexID);
+					    float2 uv  = GetFullScreenTriangleTexCoord(v.vertexID);
+					#endif
+						o.pos = pos;
+						o.uv = uv;
+					
 					return o;
 				}
-
+			
 				fixed4 fragBlurFlow(v2f i) : SV_Target
 				{
 					float weight[3] = {0.4026, 0.2442, 0.0545};

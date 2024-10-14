@@ -284,6 +284,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: C2131_D_MI_S03
       objectReference: {fileID: 0}
+    - target: {fileID: 8875485115149319346, guid: 9bcf1d6774592ac41a9413fb9f18450f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -612,7 +616,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.23
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalPosition.z
@@ -620,7 +624,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.09723556
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalRotation.x
@@ -628,7 +632,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 0.99526143
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalRotation.z
@@ -640,10 +644,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 168.84
       objectReference: {fileID: 0}
     - target: {fileID: 3246890315629870087, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4578621693744966184, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5624115821501766298, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7857567366442738309, guid: 2f4f3377f7d5b8a48a75f8e111f164a8, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

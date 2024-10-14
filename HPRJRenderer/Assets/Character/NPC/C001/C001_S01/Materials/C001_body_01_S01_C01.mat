@@ -1,0 +1,295 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: C001_body_01_S01_C01
+  m_Shader: {fileID: 4800000, guid: 669a4156fbc061541816ed1a6cdafa83, type: 3}
+  m_ShaderKeywords: _CHARACTERSHADOWCASTER_YES _CHARACTERSHADOWRECEIVER_YES _CURVATURE_MAP_ON
+    _USESTOCKINGCOLOR_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - ClothStencil
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BlusherMaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CurvatureMap:
+        m_Texture: {fileID: 2800000, guid: d65af5e3a49f4ee42adcf157d1d14eee, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMap:
+        m_Texture: {fileID: 2800000, guid: 06fdc8516a42c7b46967f26784f5cf1f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EyelineDetailMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EyelineDiffuseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EyeshadowDetailMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EyeshadowDiffuseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EyeshadowNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FrecklesMaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HighlightDetailMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HighlightDiffuseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 07cb1212a6672a547a85edca6c18860a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MouthDetailMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MouthDiffuseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: fcbb93b0689f3ab4290f64ebf14383d4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PSSLUT:
+        m_Texture: {fileID: 2800000, guid: c65b344faac4e7d40aaa8e1f8eb58c8f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Psslut:
+        m_Texture: {fileID: 2800000, guid: 4c2e36ced3855d44493325ba3f56958d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _PsslutBase:
+        m_Texture: {fileID: 2800000, guid: df138b7e76bc2f04484f2a862e0fbfa0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RimMaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShadowMaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StockingDetailMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StockingMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StockingNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StockingPatternMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StockingPatternNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Absorbtion: 8
+    - _AlphaClip: 0
+    - _BaseSSS: 1
+    - _Blend: 0
+    - _BumpScale: 1
+    - _CURVATURE: 1
+    - _CharacterShadowCaster: 1
+    - _CharacterShadowReceiver: 1
+    - _ClearCoatMask: 0
+    - _ClearCoatSmoothness: 0
+    - _ClothStencilEnum: 8
+    - _ClothStencilShadowEnum: 8
+    - _Cull: 2
+    - _CullMode: 2
+    - _CurvatureLevel: 5.12
+    - _Cutoff: 0.5
+    - _DetailAlbedoMapScale: 1
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _EnvironmentReflections: 1
+    - _Eyeline_Double: 0
+    - _Eyeshadow_Double: 0
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 0
+    - _InSideRimFacing: 0
+    - _InSideRimIntensity: 0.1
+    - _InSideRimPower: 0.8
+    - _LobeMix: 0.4
+    - _MAIN: 0
+    - _MainColorWeight: 1
+    - _Metallic: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.005
+    - _QueueOffset: 0
+    - _ReceiveShadows: 1
+    - _RimColor: 0
+    - _Roughness: 0.119
+    - _RoughnessScale0: 0.7
+    - _RoughnessScale1: 0.5
+    - _STOCKING: 0
+    - _Scatter: 2
+    - _ShadowIntensity: 1
+    - _SkinMode: 0
+    - _SkinScatter: 0.5
+    - _Smoothness: 0.5
+    - _SmoothnessTextureChannel: 0
+    - _Specular: 0.128
+    - _SpecularHighlights: 1
+    - _SpecularScale: 0.9
+    - _SrcBlend: 1
+    - _StockingMapTiling: 1
+    - _StockingMetallicScale: 1
+    - _StockingNormalScale: 1
+    - _StockingNormalTiling: 1
+    - _StockingOcclusionScale: 1
+    - _StockingPatternMapTiling: 1
+    - _StockingPatternNormalScale: 1
+    - _StockingPatternNormalTiling: 1
+    - _StockingRimIntensity: 1
+    - _StockingRimPower: 2
+    - _StockingRoughnessScale: 1
+    - _StockingUV: 0
+    - _SupportingCharacterIndex: 0
+    - _Surface: 0
+    - _TRANSPARENTSHADOW: 0
+    - _TransparentCullMode: 0
+    - _TransparentShadowCaster: 0
+    - _TransparentShadowFactor: 0.2
+    - _TransparentShadowFactorBool: 0
+    - _TransparentShadowReceiver: 0
+    - _UVBlusher: 2
+    - _UVEyeline: 1
+    - _UVEyeshadow: 1
+    - _UVFreckles: 0
+    - _UVHighlight: 2
+    - _UVMouth: 3
+    - _UVShadow: 2
+    - _UseCustomShadowColor: 0
+    - _UseCustomShadowmap: 0
+    - _UseStockingColor: 1
+    - _UseStockingNormal: 0
+    - _WorkflowMode: 1
+    - _ZWrite: 1
+    - _group1: 0
+    - _group2: 0
+    - _group3: 0
+    - _group4: 0
+    - _wrap: 0
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BlusherColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorTint: {r: 1, g: 0.78431374, b: 0.7411765, a: 1}
+    - _CustomShadowColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FaceShadowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FrecklesColor: {r: 1, g: 1, b: 1, a: 1}
+    - _InSideRimColor: {r: 0.9811321, g: 0.8284087, b: 0.8284087, a: 1}
+    - _InSideRimDirection: {r: 0, g: 0, b: 0, a: 1}
+    - _MaskColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShadowColor: {r: 0.30980393, g: 0.003921569, b: 0.003921569, a: 1}
+    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _StockingColor: {r: 1, g: 1, b: 1, a: 1}
+    - _StockingPatternColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+--- !u!114 &6337505979609900736
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 4

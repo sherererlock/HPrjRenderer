@@ -163,6 +163,8 @@ namespace UnityEngine.Rendering.Universal
 
         private HairDepthRenderPass hairDepthPass;
         private HairShadowRenderPass hairShadowPass;
+        private WriteClothStencilAndPreZPass writeClothStencilAndPreZPass;
+        private DrawObjectsPass writeClothStencilAndPreZPass1;
         
         /// <summary>
         /// Constructor for the Universal Renderer.
@@ -283,6 +285,12 @@ namespace UnityEngine.Rendering.Universal
             // Always create this pass even in deferred because we use it for wireframe rendering in the Editor or offscreen depth texture rendering.
             m_RenderOpaqueForwardPass = new DrawObjectsPass(URPProfileId.DrawOpaqueObjects, true, RenderPassEvent.BeforeRenderingOpaques, RenderQueueRange.opaque, data.opaqueLayerMask, m_DefaultStencilState, stencilData.stencilReference);
             m_RenderOpaqueForwardWithRenderingLayersPass = new DrawObjectsWithRenderingLayersPass(URPProfileId.DrawOpaqueObjects, true, RenderPassEvent.BeforeRenderingOpaques, RenderQueueRange.opaque, data.opaqueLayerMask, m_DefaultStencilState, stencilData.stencilReference);
+
+            ShaderTagId[] clothStencilShaderTagIds =
+                {  new ShaderTagId("StandardPreZ") };
+            
+            writeClothStencilAndPreZPass = new WriteClothStencilAndPreZPass("WriteClothStencilAndPreZ", clothStencilShaderTagIds, true, 
+                RenderPassEvent.BeforeRenderingOpaques, RenderQueueRange.all, data.opaqueLayerMask, m_DefaultStencilState, stencilData.stencilReference);
 
             bool copyDepthAfterTransparents = m_CopyDepthMode == CopyDepthMode.AfterTransparents;
             RenderPassEvent copyDepthEvent = copyDepthAfterTransparents ? RenderPassEvent.AfterRenderingTransparents : RenderPassEvent.AfterRenderingSkybox;
@@ -1132,6 +1140,11 @@ namespace UnityEngine.Rendering.Universal
                 if (SystemInfo.usesLoadStoreActions)
 #endif
                 renderOpaqueForwardPass.ConfigureClear(opaqueForwardPassClearFlag, Color.black);
+                
+                writeClothStencilAndPreZPass.ConfigureColorStoreAction(opaquePassColorStoreAction);
+                writeClothStencilAndPreZPass.ConfigureDepthStoreAction(opaquePassDepthStoreAction);
+
+                EnqueuePass(writeClothStencilAndPreZPass);
 
                 EnqueuePass(renderOpaqueForwardPass);
             }

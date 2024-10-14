@@ -113,7 +113,7 @@ Shader "Universal Render Pipeline/Lit"
             // Shader Stages
             #pragma vertex LitPassVertex
             #pragma fragment LitPassFragment
-
+            #pragma enable_d3d11_debug_symbols
             // -------------------------------------
             // Material Keywords
             #pragma shader_feature_local _NORMALMAP

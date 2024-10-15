@@ -2,21 +2,31 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: P0008_B_SK_03_C01
   m_Shader: {fileID: 4800000, guid: 5210c048549286b49a3acd01cee7cb13, type: 3}
-  m_ShaderKeywords: _ALPHATEST_ON _ALPHA_TEST_ON _DETAIL_ON
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _ALPHATEST_ON
+  - _DETAIL_ON
+  m_InvalidKeywords:
+  - _ALPHA_TEST_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 2450
+  stringTagMap:
+    RenderType: TransparentCutout
   disabledShaderPasses:
   - SpecialTranspPreZ
+  - ClothStencil
+  - SRPDEFAULTUNLIT
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -116,6 +126,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SheenNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SheenTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -156,6 +170,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _ALBEDO: 0
     - _AlphaClip: 0
@@ -185,6 +200,7 @@ Material:
     - _CullMode: 2
     - _Cutoff: 0.3
     - _DETAIL: 1
+    - _DarkPow: 2
     - _DetailAlbedoMapScale: 1
     - _DetailBlend: 0
     - _DetailDiffuseTiling: 0
@@ -194,12 +210,17 @@ Material:
     - _DetailNormalTiling: 1
     - _DetailOcclusionScale: 1
     - _DetailRoughnessScale: 1
+    - _DissolveCutWidth: 0.03
+    - _DissolveDirection: 2
+    - _DissolveDivisor: 1
+    - _DissolveReverse: 0
     - _DstBlend: 0
     - _EFFECT: 0
     - _EffectType: 0
     - _Emission: 0
     - _EmissionOn: 0
     - _EnvironmentReflections: 1
+    - _ForceTransparent: 0
     - _Furlight: 0
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -208,9 +229,10 @@ Material:
     - _InSideRimIntensity: 0.1
     - _InSideRimPower: 10
     - _MAIN: 0
+    - _MainColorWeight: 1
     - _Metallic: 0
     - _MetallicScale: 0
-    - _ModifiedZTest: 2
+    - _ModifiedZTest: 3
     - _NormalScale: 0.888
     - _OcclusionScale: 1
     - _OcclusionStrength: 1
@@ -221,6 +243,9 @@ Material:
     - _PatternMetallicScale: 0
     - _PatternNormalWeight: 0.5
     - _PatternOcclusionScale: 1
+    - _PatternOffsetX: 0
+    - _PatternOffsetY: 0
+    - _PatternRotateAngle: 0
     - _PatternRoughnessScale: 1
     - _PatternTiling: 1
     - _QueueOffset: 0
@@ -230,14 +255,18 @@ Material:
     - _RoughnessScale: 1
     - _SPARKLE: 0
     - _Sheen: 0
+    - _SheenMetallic: 1
+    - _SheenNoramlIntensity: 0
     - _SheenRoughnessScale: 1
     - _SheenScale: 1
     - _SheenTiling: 1
     - _SkyRotation: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SparkleAplhaEnhance: 0
     - _SparkleCutoff: 0.5
     - _SparkleDependency: 0.5
+    - _SparkleEnhancePow: 2
     - _SparkleFrequency: 500
     - _SparkleRoughness: 0.5
     - _SparkleScaleMin: 0.5
@@ -268,11 +297,13 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorTint: {r: 0.9150943, g: 0.9150943, b: 0.9150943, a: 1}
     - _CubeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DarkColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GuideColor: {r: 1, g: 1, b: 1, a: 0}
     - _InSideRimColor: {r: 1, g: 1, b: 1, a: 1}
     - _PatternColorTint: {r: 1, g: 1, b: 1, a: 1}
     - _SheenColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SheenWarp: {r: 1, g: 1, b: 1, a: 1}
     - _SparkleColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Specular: {r: 1, g: 1, b: 1, a: 1}

@@ -43,6 +43,40 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-4970482733486106795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e35b211d1cc31ed41a6f5cb556c37e04, type: 3}
+  m_Name: FurShellRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    passTag: FurRenderFeature
+    renderPassEvent: 400
+    filterSettings:
+      RenderQueueType: 1
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 4294967295
+      PassNames:
+      - FurShell0
+      - FurShell1
+      - FurShell2
+      - FurShell3
+      - FurShell4
+      - FurShell5
+      - FurShell6
+      - FurShell7
+      - FurShell8
+      - FurShell9
+      - FurShell10
+      - FurShell11
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,7 +94,8 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -5093507335397728460}
-  m_RendererFeatureMap: 349fc5a4103a50b9
+  - {fileID: -4970482733486106795}
+  m_RendererFeatureMap: 349fc5a4103a50b9551759e4494c05bb
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

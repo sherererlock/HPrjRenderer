@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: afc4231d066b5d04b8b1e6519e35a43a
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: shaders/fur.bytes
+  assetBundleVariant: 

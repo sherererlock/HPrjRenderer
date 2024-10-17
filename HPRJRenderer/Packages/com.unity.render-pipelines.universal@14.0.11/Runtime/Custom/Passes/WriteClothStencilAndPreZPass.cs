@@ -181,9 +181,37 @@ namespace UnityEngine.Rendering.Universal
             internal List<ShaderTagId> m_ShaderTagIdList;
             internal ProfilingSampler m_ProfilingSampler;
 
-            internal bool m_ShouldTransparentReceiveShadows;
             internal bool m_IsActiveTargetBackBuffer;
             internal WriteClothStencilAndPreZPass pass;
+        }
+
+        internal void Render(RenderGraph renderGraph, TextureHandle colorTarget, TextureHandle depthTarget,
+            ref RenderingData renderingData)
+        {
+            using (var builder = renderGraph.AddRenderPass<PassData>("WriteClothStencilAndPreZPass", out PassData data))
+            {
+                data.m_Albedo = builder.UseColorBuffer(colorTarget, 0);
+                data.m_Depth = builder.UseDepthBuffer(depthTarget, DepthAccess.Write);
+                
+                data.m_RenderingData = renderingData;
+                data.m_IsOpaque = m_IsOpaque;
+                data.m_RenderStateBlock = m_RenderStateBlock;
+                data.m_FilteringSettings = m_FilteringSettings;
+                data.m_ShaderTagIdList = m_ShaderTagIdList;
+                data.m_ProfilingSampler = m_ProfilingSampler;
+
+                data.m_IsActiveTargetBackBuffer = m_IsActiveTargetBackBuffer;
+                data.pass = this;
+                
+                builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
+                {
+                    ref var renderingData = ref data.m_RenderingData;
+                    bool yflip =
+                        renderingData.cameraData.IsRenderTargetProjectionMatrixFlipped(data.m_Albedo, data.m_Depth);
+                    CameraSetup(context.cmd, data, ref renderingData);
+                    ExecutePass(context.renderContext, data, ref renderingData, yflip);
+                });
+            }
         }
         
         protected virtual void OnExecute(CommandBuffer cmd) { }

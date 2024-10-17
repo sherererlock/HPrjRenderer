@@ -164,8 +164,7 @@ namespace UnityEngine.Rendering.Universal
         private HairDepthRenderPass hairDepthPass;
         private HairShadowRenderPass hairShadowPass;
         private WriteClothStencilAndPreZPass writeClothStencilAndPreZPass;
-        private DrawObjectsPass writeClothStencilAndPreZPass1;
-        
+
         /// <summary>
         /// Constructor for the Universal Renderer.
         /// </summary>

@@ -39,7 +39,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _AlbedoMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: a229e38005d2fa742823868c580703c5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
@@ -55,7 +55,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d58a13bd47bb50f45a52abab9d87f045, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
@@ -71,7 +71,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FurNoiseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 59351a5a9e9714a4489a5effcd0980f7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -95,7 +95,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParamMaskMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d6551e3885827e841923afe46bc2a0b3, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -125,22 +125,22 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ClipAdjust: 0.25
+    - _ClipAdjust: 1
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _EdgeControl: 0.36
-    - _EdgeFade: 0.5
+    - _EdgeControl: 0
+    - _EdgeFade: 0.752
     - _EnvironmentReflections: 1
     - _FLOWMAPPROP: 0
     - _FRESNELEDGE: 0
     - _FUR: 0
-    - _FurLength: 0.2
-    - _FurOcclusion: 0.3
-    - _FurScale: 50
+    - _FurLength: 0.005
+    - _FurOcclusion: 0.191
+    - _FurScale: 17.1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
@@ -149,18 +149,18 @@ Material:
     - _IntensityMaskScale: 1
     - _IsFurShell: 1
     - _Metallic: 0
-    - _NormalScale: 1
+    - _NormalScale: 1.339
     - _OcclusionScale: 1
     - _OcclusionStrength: 1
     - _PARAMS: 0
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RimIntensity: 0.9
-    - _RimPower: 3
-    - _RoughnessScale: 1
+    - _RimIntensity: 0.24
+    - _RimPower: 3.28
+    - _RoughnessScale: 0.761
     - _SCATTER: 0
-    - _ScatterScale: 1
+    - _ScatterScale: 0.711
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -184,7 +184,7 @@ Material:
     - _DeepAreaColor: {r: 0.6, g: 0.39999998, b: 0.39999998, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GravityDir: {r: 0, g: 0, b: -1, a: 0}
-    - _ScatterColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ScatterColor: {r: 0.754717, g: 0.58339083, b: 0.16019939, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _WindDir: {r: 0.2, g: 0.3, b: 0.2, a: 0}
     - _WindFreq: {r: 0.5, g: 0.7, b: 0.9, a: 1}

@@ -535,7 +535,7 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] bool m_SupportsLightLayers = false;
         [SerializeField] [Obsolete] PipelineDebugLevel m_DebugLevel;
         [SerializeField] StoreActionsOptimization m_StoreActionsOptimization = StoreActionsOptimization.Auto;
-        [SerializeField] bool m_EnableRenderGraph = false;
+        [SerializeField] bool m_EnableRenderGraph = true;
 
         // Adaptive performance settings
         [SerializeField] bool m_UseAdaptivePerformance = true;

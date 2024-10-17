@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Experimental;
+using UnityEngine.Experimental.Rendering.RenderGraphModule;
 
 namespace UnityEngine.Rendering.Universal
 {
@@ -110,6 +111,20 @@ namespace UnityEngine.Rendering.Universal
                 cmd.Clear();
             }
             
+        }
+
+        private class PassData
+        {
+            internal RenderingData renderingData;
+            internal HairDepthRenderPass pass;
+        }
+        
+        internal void Render(RenderGraph renderGraph, out TextureHandle destination, ref RenderingData renderingData)
+        {
+            using (var builder = renderGraph.AddRenderPass<PassData>("HairDepth", out PassData data))
+            {
+                
+            }
         }
 
         // Cleanup any allocated resources that were created during the execution of this render pass.

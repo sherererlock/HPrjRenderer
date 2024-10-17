@@ -205,7 +205,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             using (var builder = renderGraph.AddRenderPass<PassData>("Setup Global Depth", out var passData, base.profilingSampler))
             {
                 passData.source = builder.ReadTexture(source);
-                builder.AllowPassCulling(false);
+                builder.AllowPassCulling(true);
 
                 builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
                 {

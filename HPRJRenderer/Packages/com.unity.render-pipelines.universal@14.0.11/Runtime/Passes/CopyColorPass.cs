@@ -254,7 +254,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 passData.cmd = renderingData.commandBuffer;
 
                 // TODO RENDERGRAPH: culling? force culling off for testing
-                builder.AllowPassCulling(false);
+                builder.AllowPassCulling(true);
 
                 builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
                 {

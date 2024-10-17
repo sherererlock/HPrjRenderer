@@ -221,7 +221,7 @@ namespace UnityEngine.Rendering.Universal
             using (var builder = renderGraph.AddRenderPass<PassData>("Motion Vector Pass", out var passData, base.profilingSampler))
             {
                 //  TODO RENDERGRAPH: culling? force culling off for testing
-                builder.AllowPassCulling(false);
+                builder.AllowPassCulling(true);
 
                 passData.motionVectorColor = builder.UseColorBuffer(motionVectorColor, 0);
                 passData.motionVectorDepth = builder.UseDepthBuffer(motionVectorDepth, DepthAccess.Write);

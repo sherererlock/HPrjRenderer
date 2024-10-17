@@ -327,6 +327,7 @@ namespace UnityEngine.Rendering.Universal
             }
 #endif
 
+            writeClothStencilAndPreZPass.Render(renderGraph, m_ActiveRenderGraphColor, m_ActiveRenderGraphDepth, ref renderingData);
             if (this.renderingModeActual == RenderingMode.Deferred)
             {
                 m_DeferredLights.Setup(m_AdditionalLightsShadowCasterPass);
@@ -351,6 +352,9 @@ namespace UnityEngine.Rendering.Universal
 
             if (renderingData.cameraData.renderType == CameraRenderType.Base)
                 m_DrawSkyboxPass.Render(renderGraph, m_ActiveRenderGraphColor, m_ActiveRenderGraphDepth, ref renderingData);
+            
+            RecordCustomRenderGraphPasses(renderGraph, context, ref renderingData,  RenderPassEvent.AfterRenderingSkybox);
+            
             //if (requiresDepthCopyPass)
             {
                 m_CopyDepthPass.Render(renderGraph, out frameResources.cameraDepthTexture, in m_ActiveRenderGraphDepth, ref renderingData);

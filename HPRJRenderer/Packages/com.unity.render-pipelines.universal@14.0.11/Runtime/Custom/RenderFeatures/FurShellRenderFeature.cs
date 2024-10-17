@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.RenderGraphModule;
 using UnityEngine.Experimental.Rendering.Universal;
 
 namespace UnityEngine.Rendering.Universal
@@ -93,6 +94,11 @@ namespace UnityEngine.Rendering.Universal
                 m_ShaderTagList.Add(new ShaderTagId(shaderTag));
             }
 
+            RenderQueueRange renderQueueRange = (renderQueueType == RenderQueueType.Transparent)
+                ? RenderQueueRange.transparent
+                : RenderQueueRange.opaque;
+            m_FilteringSettings = new FilteringSettings(renderQueueRange, layerMask);
+            
             m_RenderStateBlock = new RenderStateBlock(RenderStateMask.Nothing);
         }
         
@@ -117,6 +123,34 @@ namespace UnityEngine.Rendering.Universal
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
                 context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref m_FilteringSettings, ref m_RenderStateBlock);
+            }
+        }
+
+        class PassData
+        {
+            internal FurShellRenderPass pass;
+            internal RenderingData renderingData;
+        }
+        internal override void RecordRenderGraph(RenderGraph renderGraph, ref RenderingData renderingData)
+        {
+            UniversalRenderer renderer = (UniversalRenderer)renderingData.cameraData.renderer;
+            using (var builder = renderGraph.AddRenderPass<PassData>("FurshellRenderPass", out PassData data))
+            {
+                TextureHandle color = UniversalRenderer.m_ActiveRenderGraphColor;
+                builder.UseColorBuffer(color, 0);
+                builder.UseDepthBuffer(UniversalRenderer.m_ActiveRenderGraphDepth, DepthAccess.Write);
+                builder.ReadTexture(renderer.frameResources.mainShadowsTexture);
+                
+                builder.AllowPassCulling(true);
+
+                data.pass = this;
+                data.renderingData = renderingData;
+                
+                builder.SetRenderFunc((PassData data, RenderGraphContext rgContex) =>
+                    {
+                        data.pass.Execute(rgContex.renderContext, ref data.renderingData);
+                    }
+                );
             }
         }
     }

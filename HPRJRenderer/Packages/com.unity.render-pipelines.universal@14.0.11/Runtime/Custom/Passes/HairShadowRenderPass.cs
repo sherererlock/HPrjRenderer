@@ -116,8 +116,65 @@ namespace UnityEngine.Rendering.Universal
             }
         }
 
+        private class PassData
+        {
+            internal HairShadowRenderPass pass;
+            internal RenderingData data;
+            internal TextureHandle hairShadow;
+        }
+        
+        public void Render(RenderGraph renderGraph, TextureHandle hairDepth, out TextureHandle hairShadow, out TextureHandle blurredHairShadow,
+            ref RenderingData renderingData)
+        {
+            using (var builder = renderGraph.AddRenderPass<PassData>("Hair Shadow", out PassData data))
+            {
+                RenderTextureDescriptor cameraTextureDescriptor = renderingData.cameraData.cameraTargetDescriptor;
 
+                cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R32G32B32A32_SFloat;
+                cameraTextureDescriptor.depthBufferBits = 0;
+                hairShadow =
+                    UniversalRenderer.CreateRenderGraphTexture(renderGraph, cameraTextureDescriptor, s_TextureName,
+                        true);
 
+                data.pass = this;
+
+                builder.UseColorBuffer(hairShadow, 0);
+                builder.ReadTexture(hairDepth);
+                builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
+                {
+                    data.pass.Execute(context.renderContext, ref data.data);
+                });
+            }
+            
+            using (var builder = renderGraph.AddRenderPass<PassData>("Blur Hair Shadow", out PassData data))
+            {
+                RenderTextureDescriptor cameraTextureDescriptor = renderingData.cameraData.cameraTargetDescriptor;
+
+                cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R32G32B32A32_SFloat;
+                cameraTextureDescriptor.depthBufferBits = 0;
+                blurredHairShadow =
+                    UniversalRenderer.CreateRenderGraphTexture(renderGraph, cameraTextureDescriptor, s_BlurredTextureName,
+                        true);
+                
+                data.hairShadow = hairShadow;
+                builder.ReadTexture(hairShadow);
+                
+                builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
+                {
+                    Blit(context.cmd, hairShadowTexture, blurredHairShadowTexture, blurMat, 0);
+                });
+            }
+            
+            using (var builder = renderGraph.AddRenderPass<PassData>("SetGlobalHairDepth", out PassData data))
+            {
+                data.hairShadow = blurredHairShadow;
+                builder.ReadTexture(blurredHairShadow);
+                builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
+                {
+                    context.cmd.SetGlobalTexture("_HairShadowTexture", data.hairShadow);
+                });
+            }
+        }
         
         // Cleanup any allocated resources that were created during the execution of this render pass.
         // public override void OnCameraCleanup(CommandBuffer cmd)

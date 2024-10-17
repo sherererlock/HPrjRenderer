@@ -59,8 +59,19 @@ namespace UnityEngine.Rendering.Universal
         // The render pipeline will ensure target setup and clearing happens in a performant manner.
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
-            RenderTextureDescriptor descriptor = renderingData.cameraData.cameraTargetDescriptor;
+            RenderTextureDescriptor descriptor = GetDepthDescriptor(ref renderingData);
 
+            RenderingUtils.ReAllocateIfNeeded(ref hairDepthTexture, descriptor, FilterMode.Bilinear,
+                TextureWrapMode.Clamp, name: s_TextureName);
+
+            hairRenderingData.hairDepthTexture = hairDepthTexture;
+            
+            cmd.EnableShaderKeyword(k_RenderingHairDepth);
+        }
+
+        private RenderTextureDescriptor GetDepthDescriptor(ref RenderingData renderingData)
+        {
+            RenderTextureDescriptor descriptor = renderingData.cameraData.cameraTargetDescriptor;
             descriptor.width = resolution;
             descriptor.height = resolution;
             descriptor.graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.None;
@@ -73,12 +84,7 @@ namespace UnityEngine.Rendering.Universal
             descriptor.msaaSamples = 1;
             descriptor.autoGenerateMips = false;
 
-            RenderingUtils.ReAllocateIfNeeded(ref hairDepthTexture, descriptor, FilterMode.Bilinear,
-                TextureWrapMode.Clamp, name: s_TextureName);
-
-            hairRenderingData.hairDepthTexture = hairDepthTexture;
-            
-            cmd.EnableShaderKeyword(k_RenderingHairDepth);
+            return descriptor;
         }
 
         // Here you can implement the rendering logic.
@@ -117,12 +123,34 @@ namespace UnityEngine.Rendering.Universal
         {
             internal RenderingData renderingData;
             internal HairDepthRenderPass pass;
+            internal TextureHandle hairdepth;
         }
         
         internal void Render(RenderGraph renderGraph, out TextureHandle destination, ref RenderingData renderingData)
         {
             using (var builder = renderGraph.AddRenderPass<PassData>("HairDepth", out PassData data))
             {
+                RenderTextureDescriptor descriptor = GetDepthDescriptor(ref renderingData);
+                destination = UniversalRenderer.CreateRenderGraphTexture(renderGraph, descriptor, s_TextureName, true);
+                
+                data.pass = this;
+                data.renderingData = renderingData;
+
+                builder.UseDepthBuffer(destination, DepthAccess.Write);
+                builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
+                {
+                    data.pass.Execute(context.renderContext, ref data.renderingData);
+                });
+            }
+
+            using (var builder = renderGraph.AddRenderPass<PassData>("SetGlobalHairDepth", out PassData data))
+            {
+                data.hairdepth = destination;
+                builder.UseColorBuffer(destination, 0);
+                builder.SetRenderFunc((PassData data, RenderGraphContext context) =>
+                {
+                    context.cmd.SetGlobalTexture("_HairDepthTexture", data.hairdepth);
+                });
                 
             }
         }

@@ -25,6 +25,9 @@ namespace UnityEngine.Rendering.Universal
 
             internal TextureHandle mainShadowsTexture;
             internal TextureHandle additionalShadowsTexture;
+            
+            internal TextureHandle hairDepthTexture;
+            internal TextureHandle hairShadowTexture;
 
             // gbuffer targets
 
@@ -326,7 +329,9 @@ namespace UnityEngine.Rendering.Universal
                 m_XROcclusionMeshPass.Render(renderGraph, frameResources.cameraColor, frameResources.cameraDepth, ref renderingData);
             }
 #endif
-
+            
+            hairDepthPass.Render(renderGraph, out frameResources.hairDepthTexture, ref renderingData);
+            
             writeClothStencilAndPreZPass.Render(renderGraph, m_ActiveRenderGraphColor, m_ActiveRenderGraphDepth, ref renderingData);
             if (this.renderingModeActual == RenderingMode.Deferred)
             {
